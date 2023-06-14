@@ -1,0 +1,59 @@
+body{
+    background-color: aquamarine;
+     justify-content: center;
+    align-items: center;
+    display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+    display: -ms-flexbox;  /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+    display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
+}
+table, td, th{
+    background-color: blanchedalmond;
+    border: 1px black solid;
+    border-collapse: collapse;
+    color: rgba(128, 0, 128, 0.634);
+    text-transform: capitalize;     
+    text-align: left;
+    font-size: 20px;
+}
+
+th{
+    font-size: 24px;
+    color: purple;
+    text-align: center;
+}
+h1, h2{
+    color:rgb(62, 24, 174);
+    text-transform: capitalize; 
+    text-align: center;
+}
+
+
+p{
+    color: rgb(62, 24, 174);
+    
+}
+.content {
+    width: 100%;  
+  }
+
+  img{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
+  }
+
+  section{
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  div.blocks{
+    background-color: gray;
+    padding: 5px;
+    border: 1px;
+    border-radius: 25px;
+    justify-content: center;
+  }
