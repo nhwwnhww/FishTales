@@ -37,12 +37,43 @@ body {
         ({key: "AIzaSyBK9qIGI_CU2QkIREeJJ0B2dMwZzxLyA_I", v: "beta"});</script>
 
 <script>
+
+var mylat = -27.360421;
+var mylng = 152.962097;
+
+
     // Initialize and add the map
     let map;
     
     async function initMap() {
-      // The location of Uluru
-      const position = { lat: -25.344, lng: 131.031 };
+
+      
+    // Check if geolocation is supported by the browser
+    if ("geolocation" in navigator) {
+  // Prompt user for permission to access their location
+  navigator.geolocation.getCurrentPosition(
+    // Success callback function
+    (myposition) => {
+      // Get the user's latitude and longitude coordinates
+      mylat = myposition.coords.latitude;
+      mylng = myposition.coords.longitude;
+
+      // Do something with the location data, e.g. display on a map
+      console.log(`Latitude: ${mylat}, longitude: ${mylng}`);
+    },
+    // Error callback function
+    (error) => {
+      // Handle errors, e.g. user denied location sharing permissions
+      console.error("Error getting user location:", error);
+    }
+    );
+  } else {
+    // Geolocation is not supported by the browser
+    console.error("Geolocation is not supported by this browser.");
+  };
+
+      // The location
+        const position = await { lat: mylat, lng: mylng };
       // Request needed libraries.
       //@ts-ignore
       const { Map } = await google.maps.importLibrary("maps");
@@ -50,7 +81,7 @@ body {
     
       // The map, centered at Uluru
       map = new Map(document.getElementById("map"), {
-        zoom: 4,
+        zoom: 10,
         center: position,
         mapId: "DEMO_MAP_ID",
       });
@@ -61,7 +92,25 @@ body {
         position: position,
         title: "Uluru",
       });
+
+      
+
+  const image =
+    "data:image/jpeg;base64,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";
+  const beachMarker = new google.maps.Marker({
+    position: { lat: -27.395762, lng: 153.165408 },
+    map,
+    icon: image,
+  });
+
+  const beachMarker2 = new google.maps.Marker({
+    position: { lat: -27.203600, lng: 153.060976 },
+    map,
+    icon: image,
+  });
     }
+
+
     
     initMap();
         </script>
