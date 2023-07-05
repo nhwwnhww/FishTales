@@ -1,14 +1,61 @@
 <?php
 session_start();
-$userID = $_SESSION['userID'];
-$username = $_SESSION['username'];
+if (isset($_SESSION['username'])){
+    $userID = $_SESSION['userID'];
+    $username = $_SESSION['username'];
+}
+else{
+    $userID = 0;
+    $username = 'Guest';
+    $_SESSION['userID'] = $userID;
+    $_SESSION['username'] = $username;
+}
 
 if ($username == 'guest'){
-    echo "<h1 style='background:red'>You are not logged in yet. Please log in to .</h1><br><a href='index.php'>Click me to login</a>";
+    echo "<h1 style='background:red'>You are not logged in yet. Please log in</h1><br><a href='index.php'>Click me to login</a>";
 }
+// echo 'username is : ('. $username.')';
+$scientificName = $_GET['scientificName'];
+$_SESSION['fishName'] = $scientificName;
+
+$_SESSION['backLink'] = $backLink = "./detail.php?scientificName=$scientificName";
 
 //Create database connection -> 4 variables are 'localhost', username for the localhost (should be 'root', password for loacalhost (should be nothing), and database name
 $conn = new mysqli("localhost", "root", "", "fishtales");
+
+//This line makes the sql
+$sql = "SELECT * FROM `markers` JOIN `users` ON markers.userID = users.userID WHERE `fishName` = '$scientificName'";
+// echo $sql;
+
+
+//This line runs the query
+$result = $conn->query($sql);
+
+//Check if in database
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $username = $row["username"];
+        $fishName = $row["fishName"];
+        $Latitude = $row["Latitude"];
+        $Longitude = $row["Longitude"];
+        $date = $row["date"];
+        $comment = $row["comment"];
+
+
+        $markers[] = [
+            'position' => ['lat' => floatval($row['Latitude']), 'lng' => floatval($row['Longitude'])],
+            'title' => $row['fishName'],
+            'content' => ['username' => $row['username'],
+            'fishName' => $row['fishName'],
+             'date' => $row['date'],
+             'Latitude' => $row['Latitude'],
+             'Longitude' => $row['Longitude'],
+             'comment' => $row['comment']]
+        ];
+    }
+} else {
+    $markers = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,8 +63,8 @@ $conn = new mysqli("localhost", "root", "", "fishtales");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $scientificName ?></title>
     <script src="jquery-3.4.1.min.js"></script>
-    <title>Search</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous" />
 
@@ -47,126 +94,51 @@ $conn = new mysqli("localhost", "root", "", "fishtales");
 </head>
 
 <body>
-    <h1>Hi! <?php echo $username ?></h1>
-    <a href="./index.php">log out</a>
-
-    <form id="searchForm">
-        <input type="text" id="searchInput" placeholder="Enter search term">
-        <button type="submit">Search</button>
-    </form>
-    <h2>Search Result:</h2>
+    <h2>Fish Details:</h2>
     <div id="output"></div>
 
-    <h1>Suggestion</h1>
-    <form id="suggestionForm">
-        <button type="submit">Suggestion 5 fishes</button>
-    </form>
-    <div id="suggestionOutput"></div>
-
     <script>
-        $('#searchForm').on('submit', function(e) {
-            e.preventDefault();
+        var urlParams = new URLSearchParams(window.location.search);
 
-            // Clear the previous results
-            $('#output').empty();
+        var scientificName = urlParams.get('scientificName');
 
-            var searchTerm = $('#searchInput').val();
-            var apiUrl = 'https://www.data.qld.gov.au/api/3/action/datastore_search?resource_id=32af9a35-d4db-41e9-b152-d52609ff6372&q=';
-
-            apiUrl += searchTerm;
-
+        if (scientificName) {
+            var apiUrl = `https://www.data.qld.gov.au/api/3/action/datastore_search?resource_id=32af9a35-d4db-41e9-b152-d52609ff6372&q=` + scientificName;
             $.getJSON(apiUrl, function(data) {
                 var total = data.result.total;
                 if (total == 0) {
-                    $('#output').html('No results found for "' + searchTerm + '".');
+                    $('#output').html('No results found for "' + commonName + '".');
                 } else {
+                    var record = data.result.records[0];
+
+                    // Display the details of the fish
                     var items = [];
-                    $.each(data.result.records, function(key, val) {
-                        items.push('<li id="' + key + '"> FamilyName: ' + val.FamilyName1 + ' CommonName: ' + val.CommonName + ' scientificName: ' + val.ScientificName + ' <a href="detail.php?scientificName=' + val.ScientificName + '">More Details</a></li>');
-                    });
-                    $('<ul/>', {
-                        'class': 'my-new-list',
+                    items.push('<p>FamilyName1: ' + record.FamilyName1 + '</p>');
+                    items.push('<p>CommonName: ' + record.CommonName + '</p>');
+                    items.push('<p>ScientificName: ' + record.ScientificName + '</p>');
+                    items.push('<p>MinSize: ' + record.MinSize + '</p>');
+                    items.push('<p>MaxSize: ' + record.MaxSize + '</p>');
+                    items.push('<p>Image1: ' + record.Image1 + '</p>');
+
+                    // Add other details as needed
+
+                    $('<div/>', {
                         html: items.join('')
                     }).appendTo('#output');
                 }
             });
-        });
-        $('#suggestionForm').on('submit', function(e) {
-            e.preventDefault();
-
-            // Clear the previous results
-            $('#suggestionOutput').empty();
-
-            var apiUrl = 'https://www.data.qld.gov.au/api/3/action/datastore_search?resource_id=32af9a35-d4db-41e9-b152-d52609ff6372&limit=5';
-
-
-            $.getJSON(apiUrl, function(data) {
-                var total = data.result.total;
-                if (total == 0) {
-                    $('#suggestionOutput').html('No results found for "' + searchTerm + '".');
-                } else {
-                    var items = [];
-                    $.each(data.result.records, function(key, val) {
-                        items.push('<li id="' + key + '"> FamilyName: ' + val.FamilyName1 + ' CommonName: ' + val.CommonName + '</li>');
-                    });
-                    $('<ul/>', {
-                        'class': 'my-new-list',
-                        html: items.join('')
-                    }).appendTo('#suggestionOutput');
-                }
-            });
-        });
+        } else {
+            $('#output').html('No fish specified.');
+        }
     </script>
 
-
-    <h1>All fish</h1>
-
-    <?php
-
-    //Create database connection -> 4 variables are 'localhost', username for the localhost (should be 'root', password for loacalhost (should be nothing), and database name
-    $conn = new mysqli("localhost", "root", "", "fishtales");
-
-    //This line makes the sql
-    $sql = "SELECT * FROM `markers` JOIN `users` ON markers.userID = users.userID";
-    // echo $sql;
-
-
-    //This line runs the query
-    $result = $conn->query($sql);
-
-    //Check if in database
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $username = $row["username"];
-            $fishName = $row["fishName"];
-            $Latitude = $row["Latitude"];
-            $Longitude = $row["Longitude"];
-            $date = $row["date"];
-            $comment = $row["comment"];
-
-
-            $markers[] = [
-                'position' => ['lat' => floatval($row['Latitude']), 'lng' => floatval($row['Longitude'])],
-                'title' => $row['fishName'],
-                'content' => [
-                    'username' => $row['username'],
-                    'fishName' => $row['fishName'],
-                    'date' => $row['date'],
-                    'Latitude' => $row['Latitude'],
-                    'Longitude' => $row['Longitude'],
-                    'comment' => $row['comment']
-                ]
-            ];
-        }
-    } else {
-        $markers = [];
-    }
-    ?>
+    <a href="./search.php">back</a>
 
     <h3>My Google Maps Demo</h3>
     <!--The div element for the map -->
     <div id="map"></div>
 
+    <a href="./AddMarker.php?fishName=<?php echo $scientificName ?>">add a new marker</a>
     <script>
         var map
 

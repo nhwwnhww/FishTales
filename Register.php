@@ -38,6 +38,7 @@ if (isset($_POST['email'])) {
       <input type="text" id="username" placeholder="username" name="username" required/>
       <input type="password" id="password" placeholder="Password" name="password" required/>
       <button type="submit">Sign Up</button>
+      <a href="./index.php">cancel</a>
     </form>
 </body>
 
