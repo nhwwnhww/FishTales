@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Data from Server:</h2>
+<div id="dataContainer"></div>
+
+<script>
+fetch('http://140.238.195.67:8080/api.php')
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+
+    // Find the dataContainer div
+    let dataContainer = document.getElementById('dataContainer');
+
+    // Create a new div to hold this piece of data
+    let dataDiv = document.createElement('div');
+
+    // Put the data into the new div
+    dataDiv.textContent = JSON.stringify(data);
+
+    // Add the new div to the dataContainer
+    dataContainer.appendChild(dataDiv);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+</script>
+
+</body>
+</html>
