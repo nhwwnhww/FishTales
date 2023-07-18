@@ -254,7 +254,7 @@ if ($result->num_rows > 0) {
                   items.push('<p>MinSize: ' + record.MinSize + '</p>');
                   items.push('<p>MaxSize: ' + record.MaxSize + '</p>');
                   items.push('<p>Image1: ' + record.Image1 + '</p>');
-                  items.push(`<div class="btn-group" role="group"><button class="btn btn-primary" type="button" >More detail</button><button class="btn btn-primary" type="button" onclick="location.href='./AddMarker.php?fishName=<?php echo $scientificName ?>';">Add a new marker on the map</button></div>`);
+                  items.push(`<div class="btn-group" role="group"><button class="btn btn-primary" type="button" onclick="location.href='https://www.gbif.org/search?q=<?php echo $scientificName ?>';">More detail</button><button class="btn btn-primary" type="button" onclick="location.href='./AddMarker.php?fishName=<?php echo $scientificName ?>';">Add a new marker on the map</button></div>`);
 
                   $('<div/>', {
                     'class': 'card-body',
